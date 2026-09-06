@@ -2,9 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 const app = express();
-const prisma = new PrismaClient();
+
 
 app.use(cors());
 app.use(express.json());
@@ -23,15 +24,19 @@ app.get("/restaurants", async (req, res) => {
 
 // POST — Cadastrar restaurante
 app.post("/restaurants", async (req, res) => {
-  const { name, category, rating } = req.body;
+  // 1. Extraia o campo description
+  const { name, category, rating, description } = req.body; 
 
   if (!name || !category) {
-    return res.status(400).json({ error: "Nome e categoria são obrigatórios" });
+    return res.status(400).json({
+      error: "Nome e categoria são obrigatórios"
+    });
   }
 
   try {
     const novoRestaurante = await prisma.restaurant.create({
-      data: { name, category, rating: rating || 0 }
+      // 2. Adicione description no objeto data
+      data: { name, category, rating: rating || 0, description } 
     });
 
     res.status(201).json(novoRestaurante);
