@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Rotas - EasyFood</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        h1, h2, h3 { color: #333; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        input { display: block; width: 90%; margin-bottom: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #218838; }
+        .output { background: #222; color: #0f0; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+        .token-status { margin-bottom: 20px; padding: 10px; background: #e9ecef; border-left: 5px solid #007bff; }
+    </style>
+</head>
+<body>
+
+    <h1>API Explorer - EasyFood</h1>
+    
+    <div class="token-status">
+        <strong>Status do Token JWT:</strong> <span id="tokenDisplay">Nenhum token (Não logado)</span>
+    </div>
+
+    <div class="container">
+        <!-- Autenticação -->
+        <div class="card">
+            <h2>Autenticação</h2>
+            
+            <h3>Cadastrar Usuário</h3>
+            <input type="text" id="regName" placeholder="Nome">
+            <input type="email" id="regEmail" placeholder="E-mail">
+            <input type="password" id="regPassword" placeholder="Senha">
+            <button onclick="register()">Cadastrar</button>
+
+            <hr>
+
+            <h3>Login</h3>
+            <input type="email" id="loginEmail" placeholder="E-mail">
+            <input type="password" id="loginPassword" placeholder="Senha">
+            <button onclick="login()">Fazer Login</button>
+
+            <hr>
+
+            <h3>Dados do Usuário (/auth/me)</h3>
+            <button onclick="getMe()">Buscar meus dados</button>
+        </div>
+
+        <!-- Restaurantes -->
+        <div class="card">
+            <h2>Restaurantes</h2>
+            
+            <h3>Listar Restaurantes (Público)</h3>
+            <button onclick="getRestaurants()">Buscar Restaurantes</button>
+
+            <hr>
+
+            <h3>Cadastrar Restaurante (Requer Token)</h3>
+            <input type="text" id="restName" placeholder="Nome (ex: Cantina Roma)">
+            <input type="text" id="restCategory" placeholder="Categoria (ex: Italiana)">
+            <input type="number" id="restRating" step="0.1" placeholder="Avaliação (ex: 4.5)">
+            <button onclick="createRestaurant()">Salvar Restaurante</button>
+        </div>
+    </div>
+
+    <h2>Resposta da API:</h2>
+    <pre id="apiOutput" class="output">Aguardando requisição...</pre>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let jwtToken = '';
+
+        function updateOutput(data) {
+            document.getElementById('apiOutput').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function setToken(token) {
+            jwtToken = token;
+            document.getElementById('tokenDisplay').textContent = token ? "Token armazenado (Logado)" : "Nenhum token (Não logado)";
+        }
+
+        async function apiCall(endpoint, method, body = null, requireAuth = false) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (requireAuth && jwtToken) {
+                headers['Authorization'] = `Bearer ${jwtToken}`;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: method,
+                    headers: headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+                
+                const data = await response.json().catch(() => ({ message: "Erro ao ler JSON da resposta" }));
+                updateOutput({ status: response.status, data });
+                return data;
+            } catch (error) {
+                updateOutput({ error: error.message });
+            }
+        }
+
+        // Chamadas de API
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            await apiCall('/auth/register', 'POST', { name, email, password });
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const data = await apiCall('/auth/login', 'POST', { email, password });
+            if (data && data.token) {
+                setToken(data.token);
+            }
+        }
+
+        async function getMe() {
+            await apiCall('/auth/me', 'GET', null, true);
+        }
+
+        async function getRestaurants() {
+            await apiCall('/restaurants', 'GET');
+        }
+
+        async function createRestaurant() {
+            const name = document.getElementById('restName').value;
+            const category = document.getElementById('restCategory').value;
+            const rating = parseFloat(document.getElementById('restRating').value);
+            
+            await apiCall('/restaurants', 'POST', { name, category, rating }, true);
+        }
+    </script>
+</body>
+</html>
