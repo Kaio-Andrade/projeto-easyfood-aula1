@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyFood — Explorador da API</title>
+    <link rel="stylesheet" href="/css/global.css" />
+    <script type="module" src="/js/pages/app.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>API Explorer — EasyFood</h1>
+      <p class="token-status"><strong>Status do token JWT:</strong> <span id="tokenDisplay">Não autenticado</span></p>
+
+      <div class="cards">
+        <section class="card" aria-labelledby="authTitle">
+          <h2 id="authTitle">Autenticação</h2>
+          <form id="registerForm">
+            <h3>Cadastrar usuário</h3>
+            <label for="regName">Nome</label>
+            <input id="regName" name="name" required />
+            <label for="regEmail">E-mail</label>
+            <input id="regEmail" name="email" type="email" required />
+            <label for="regPassword">Senha</label>
+            <input id="regPassword" name="password" type="password" required />
+            <button type="submit">Cadastrar</button>
+          </form>
+
+          <form id="loginForm">
+            <h3>Login</h3>
+            <label for="loginEmail">E-mail</label>
+            <input id="loginEmail" name="email" type="email" required />
+            <label for="loginPassword">Senha</label>
+            <input id="loginPassword" name="password" type="password" required />
+            <button type="submit">Entrar</button>
+          </form>
+          <div class="actions">
+            <button id="meButton" type="button">Consultar /auth/me</button>
+            <button id="logoutButton" class="secondary" type="button">Limpar sessão</button>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="restaurantTitle">
+          <h2 id="restaurantTitle">Restaurantes</h2>
+          <button id="listRestaurantsButton" type="button">Listar restaurantes</button>
+          <form id="restaurantForm">
+            <h3>Cadastrar restaurante (requer token)</h3>
+            <label for="restName">Nome</label>
+            <input id="restName" name="name" required />
+            <label for="restCategory">Categoria</label>
+            <input id="restCategory" name="category" required />
+            <label for="restRating">Avaliação</label>
+            <input id="restRating" name="rating" type="number" min="0" max="5" step="0.1" />
+            <button type="submit">Salvar restaurante</button>
+          </form>
+        </section>
+      </div>
+
+      <section aria-labelledby="responseTitle">
+        <h2 id="responseTitle">Resposta da API</h2>
+        <pre id="apiOutput" class="output" aria-live="polite">Aguardando requisição...</pre>
+      </section>
+    </main>
+  </body>
+</html>

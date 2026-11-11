@@ -23,7 +23,7 @@ async function create(req, res) {
       name,
       category,
       rating
-    });
+    }, req.user);
 
     res.status(201).json(restaurant);
   } catch (error) {

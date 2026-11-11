@@ -15,11 +15,34 @@ model Restaurant {
   name     String   @db.VarChar(150)
   category String?  @db.VarChar(100)
   rating   Decimal? @db.Decimal(2, 1)
+  ownerId  Int
+  owner    User     @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  dishes   Dish[]
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(150)
-  email    String @unique @db.VarChar(150)
-  password String @db.VarChar(255)
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(150)
+  email       String       @unique @db.VarChar(150)
+  password    String       @db.VarChar(255)
+  imageUrl    String?
+  restaurants Restaurant[]
+}
+
+model Dish {
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(150)
+  category     String     @db.VarChar(100)
+  description  String
+  price        Decimal    @db.Decimal(10, 2)
+  imageUrl     String?
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id        Int      @id @default(autoincrement())
+  action    String   @db.VarChar(100)
+  details   String?
+  createdAt DateTime @default(now())
 }
