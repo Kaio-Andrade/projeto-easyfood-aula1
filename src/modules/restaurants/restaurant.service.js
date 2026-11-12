@@ -2,6 +2,7 @@ const prisma = require("../../database/prisma");
 const emailService = require("../shared/email.service");
 const activityService = require("../shared/activity.service");
 const { escapeHtml } = emailService;
+const { restaurantData } = require("../shared/validation");
 
 async function runSecondaryAction(label, action) {
   try {
@@ -16,11 +17,10 @@ async function listRestaurants() {
 }
 
 async function createRestaurant(data, user) {
+  const validated = restaurantData(data);
   const restaurant = await prisma.restaurant.create({
     data: {
-      name: data.name,
-      category: data.category,
-      rating: data.rating || 0,
+      ...validated,
       ownerId: user.id
     }
   });

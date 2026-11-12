@@ -3,63 +3,86 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EasyFood — Explorador da API</title>
+    <meta name="description" content="Conheça os restaurantes e organize seu cardápio na EasyFood." />
+    <title>EasyFood — Restaurantes e cardápios</title>
     <link rel="stylesheet" href="/css/global.css" />
     <script type="module" src="/js/pages/app.js"></script>
   </head>
   <body>
+    <a class="skip-link" href="#restaurantsSection">Ir para restaurantes</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="EasyFood, início"><span class="brand-icon" aria-hidden="true">ef</span>EasyFood<span class="brand-dot">.</span></a>
+      <span class="header-caption">BOA COMIDA, PERTO DE VOCÊ</span>
+      <button id="accountButton" type="button" class="secondary small">Minha conta</button>
+    </header>
     <main>
-      <h1>API Explorer — EasyFood</h1>
-      <p class="token-status"><strong>Status do token JWT:</strong> <span id="tokenDisplay">Não autenticado</span></p>
-
-      <div class="cards">
-        <section class="card" aria-labelledby="authTitle">
-          <h2 id="authTitle">Autenticação</h2>
-          <form id="registerForm">
-            <h3>Cadastrar usuário</h3>
-            <label for="regName">Nome</label>
-            <input id="regName" name="name" required />
-            <label for="regEmail">E-mail</label>
-            <input id="regEmail" name="email" type="email" required />
-            <label for="regPassword">Senha</label>
-            <input id="regPassword" name="password" type="password" required />
-            <button type="submit">Cadastrar</button>
-          </form>
-
-          <form id="loginForm">
-            <h3>Login</h3>
-            <label for="loginEmail">E-mail</label>
-            <input id="loginEmail" name="email" type="email" required />
-            <label for="loginPassword">Senha</label>
-            <input id="loginPassword" name="password" type="password" required />
-            <button type="submit">Entrar</button>
-          </form>
-          <div class="actions">
-            <button id="meButton" type="button">Consultar /auth/me</button>
-            <button id="logoutButton" class="secondary" type="button">Limpar sessão</button>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><p class="eyebrow">DA COZINHA PARA A SUA MESA</p><h1 id="pageTitle">Um bom prato.<br />Uma nova descoberta.</h1><p>Explore restaurantes, descubra sabores e cuide do seu cardápio em um só lugar.</p></div>
+        <div class="intro-note"><span aria-hidden="true">✳</span><p>Feito para quem<br /><strong>ama servir bem.</strong></p></div>
+      </section>
+      <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+      <details id="accountPanel" class="account-panel">
+        <summary>Minha conta <span id="tokenDisplay">Não autenticado</span></summary>
+        <div class="account-content">
+          <div id="authForms" class="auth-forms">
+            <form id="loginForm">
+              <h2>Entre na sua conta</h2><p class="muted">Acesse seus restaurantes e personalize seu perfil.</p>
+              <label for="loginEmail">E-mail</label><input id="loginEmail" name="email" type="email" autocomplete="username" maxlength="150" required />
+              <label for="loginPassword">Senha</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+              <button type="submit">Entrar</button>
+            </form>
+            <form id="registerForm">
+              <h2>Comece por aqui</h2><p class="muted">Crie sua conta para cadastrar seu restaurante.</p>
+              <label for="regName">Nome</label><input id="regName" name="name" autocomplete="name" maxlength="150" required />
+              <label for="regEmail">E-mail</label><input id="regEmail" name="email" type="email" autocomplete="email" maxlength="150" required />
+              <label for="regPassword">Senha <span class="muted">(mínimo de 8 caracteres)</span></label><input id="regPassword" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required />
+              <button type="submit" class="secondary">Criar conta</button>
+            </form>
           </div>
+          <div id="profilePanel" hidden>
+            <div class="profile-heading"><img id="profileImage" class="avatar" alt="Sua imagem de perfil" hidden /><div><h2 id="profileName"></h2><p id="profileEmail" class="muted"></p></div></div>
+            <form id="profileImageForm" class="upload-form">
+              <label for="profileImageInput">Atualizar foto de perfil</label>
+              <p id="profileImageHelp" class="muted">JPEG, PNG ou WebP, até 5 MB.</p>
+              <input id="profileImageInput" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="profileImageHelp" required />
+              <button type="submit" class="secondary">Enviar foto</button>
+            </form>
+            <div class="actions"><button id="meButton" type="button" class="text-button">Atualizar perfil</button><button id="logoutButton" type="button" class="text-button">Sair da conta</button></div>
+          </div>
+        </div>
+      </details>
+      <div class="workspace">
+        <section id="restaurantsSection" class="restaurants-panel" aria-labelledby="restaurantsTitle">
+          <div class="section-heading"><div><p class="eyebrow">ESCOLHA O SEU PRÓXIMO SABOR</p><h2 id="restaurantsTitle">Restaurantes</h2></div><button id="listRestaurantsButton" type="button" class="text-button small">Atualizar</button></div>
+          <p id="restaurantsStatus" class="muted" role="status">Carregando restaurantes…</p>
+          <ul id="restaurantList" class="restaurant-list" aria-label="Restaurantes disponíveis"></ul>
+          <details id="restaurantCreatePanel" class="create-panel" hidden>
+            <summary>+ Cadastrar restaurante</summary>
+            <form id="restaurantForm">
+              <label for="restName">Nome do restaurante</label><input id="restName" name="name" maxlength="150" required />
+              <label for="restCategory">Categoria</label><input id="restCategory" name="category" placeholder="Ex.: Brasileira, pizza, japonesa" maxlength="100" required />
+              <label for="restRating">Avaliação (0 a 5)</label><input id="restRating" name="rating" type="number" min="0" max="5" step="0.1" />
+              <button type="submit">Salvar restaurante</button>
+            </form>
+          </details>
+          <p id="restaurantLoginHint" class="muted">Entre na sua conta para cadastrar um restaurante.</p>
         </section>
-
-        <section class="card" aria-labelledby="restaurantTitle">
-          <h2 id="restaurantTitle">Restaurantes</h2>
-          <button id="listRestaurantsButton" type="button">Listar restaurantes</button>
-          <form id="restaurantForm">
-            <h3>Cadastrar restaurante (requer token)</h3>
-            <label for="restName">Nome</label>
-            <input id="restName" name="name" required />
-            <label for="restCategory">Categoria</label>
-            <input id="restCategory" name="category" required />
-            <label for="restRating">Avaliação</label>
-            <input id="restRating" name="rating" type="number" min="0" max="5" step="0.1" />
-            <button type="submit">Salvar restaurante</button>
+        <section class="menu-panel" aria-labelledby="menuTitle">
+          <div class="menu-heading"><div><p id="menuCategory" class="eyebrow">EXPLORE O CARDÁPIO</p><h2 id="menuTitle">O que vai ser hoje?</h2><p id="menuDescription" class="muted">Escolha um restaurante ao lado para conhecer os pratos.</p></div><button id="newDishButton" type="button" hidden>+ Novo prato</button></div>
+          <form id="dishForm" class="dish-form" hidden>
+            <h3 id="dishFormTitle">Novo prato</h3><input id="dishId" name="dishId" type="hidden" />
+            <div class="form-grid"><div><label for="dishName">Nome do prato</label><input id="dishName" name="name" maxlength="150" required /></div><div><label for="dishCategory">Categoria</label><input id="dishCategory" name="category" maxlength="100" placeholder="Ex.: Entrada, almoço, sobremesa" required /></div></div>
+            <label for="dishDescription">Descrição</label><textarea id="dishDescription" name="description" maxlength="1000" rows="3" required></textarea>
+            <label for="dishPrice">Preço (R$)</label><input id="dishPrice" name="price" type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" required />
+            <p class="muted">Depois de salvar, você pode adicionar uma foto ao prato.</p>
+            <div class="actions"><button type="submit">Salvar prato</button><button id="cancelDishButton" type="button" class="secondary">Cancelar</button></div>
           </form>
+          <p id="dishesStatus" class="empty-state" role="status">Cada restaurante tem uma história. Comece escolhendo um.</p>
+          <div id="dishList" class="dish-grid"></div>
         </section>
       </div>
-
-      <section aria-labelledby="responseTitle">
-        <h2 id="responseTitle">Resposta da API</h2>
-        <pre id="apiOutput" class="output" aria-live="polite">Aguardando requisição...</pre>
-      </section>
+      <details class="debug-panel"><summary>Detalhes da última operação</summary><pre id="apiOutput" class="output">Aguardando requisição...</pre></details>
     </main>
+    <footer>EasyFood<span class="brand-dot">.</span><span>Boas histórias começam à mesa.</span></footer>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { apiCall, setToken } from "./api.js";
+import { apiCall, setToken, uploadImage } from "./api.js";
 
 export async function registerUser(user) {
   return apiCall("/auth/register", { method: "POST", body: user });
@@ -16,4 +16,8 @@ export function getCurrentUser() {
 
 export function logout() {
   setToken(null);
+}
+
+export function uploadProfileImage(file) {
+  return uploadImage("/auth/me/image", file);
 }

@@ -26,6 +26,12 @@ require.cache[prismaPath] = {
       async findUnique({ where }) {
         return users.find((user) => where.email ? user.email === where.email : user.id === where.id) || null;
       },
+      async findFirst({ where, select }) {
+        const user = users.find((item) => where.email.mode === "insensitive"
+          ? item.email.toLowerCase() === where.email.equals.toLowerCase()
+          : item.email === where.email.equals) || null;
+        return user && select ? Object.fromEntries(Object.keys(select).map((key) => [key, user[key]])) : user;
+      },
       async update({ where, data, select }) {
         const user = users.find((item) => item.id === where.id);
         if (!user) throw new Error("User not found");
