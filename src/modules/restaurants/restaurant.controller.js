@@ -10,24 +10,13 @@ async function list(req, res) {
 }
 
 async function create(req, res) {
-  const { name, category, rating } = req.body;
-
-  if (!name || !category) {
-    return res.status(400).json({
-      error: "Nome e categoria são obrigatórios"
-    });
-  }
-
   try {
-    const restaurant = await restaurantService.createRestaurant({
-      name,
-      category,
-      rating
-    }, req.user);
+    const restaurant = await restaurantService.createRestaurant(req.body, req.user);
 
     res.status(201).json(restaurant);
   } catch (error) {
-     console.error("Erro real do Restaurant Service:", error);
+    if (error.statusCode) return res.status(error.statusCode).json({ error: error.message });
+    console.error("Erro ao cadastrar restaurante:", error);
     res.status(500).json({
       error: "Erro interno do servidor"
     });

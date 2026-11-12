@@ -4,8 +4,15 @@ const prisma = require("../../database/prisma");
 const imageService = require("../shared/image.service");
 const activityService = require("../shared/activity.service");
 const { JWT_SECRET } = require("./auth.config");
+const { registrationData, loginData, parseId, httpError } = require("../shared/validation");
 
-async function register({ name, email, password }) {
+async function register(data) {
+  const { name, email, password } = registrationData(data);
+  const existingUser = await prisma.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { id: true }
+  });
+  if (existingUser) throw httpError("E-mail já cadastrado", 409);
   const hash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
@@ -19,10 +26,19 @@ async function register({ name, email, password }) {
   };
 }
 
-async function login({ email, password }) {
-  const user = await prisma.user.findUnique({
+async function login(data) {
+  const { email, password } = loginData(data);
+  let user = await prisma.user.findUnique({
     where: { email }
   });
+
+  // Older accounts may have been stored before email normalization existed.
+  if (!user) {
+    user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+      orderBy: { id: "asc" }
+    });
+  }
 
   if (!user) {
     return null;
@@ -58,13 +74,13 @@ async function login({ email, password }) {
 
 async function getById(id) {
   return prisma.user.findUnique({
-    where: { id: Number(id) },
+    where: { id: parseId(id) },
     select: { id: true, name: true, email: true, imageUrl: true }
   });
 }
 
 async function uploadProfileImage(userId, buffer) {
-  const id = Number(userId);
+  const id = parseId(userId);
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
     const error = new Error("Usuário não encontrado");

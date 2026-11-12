@@ -1,0 +1,17 @@
+.git
+.agents
+.windsurf
+.env
+.env.*
+!.env.example
+node_modules
+uploads
+test
+work
+output
+adrs
+docs
+npm-debug.log*
+*.log
+coverage
+teste.js

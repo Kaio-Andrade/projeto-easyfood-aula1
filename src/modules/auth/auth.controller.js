@@ -24,30 +24,19 @@ async function uploadImage(req, res) {
 }
 
 async function register(req, res) {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      error: "Nome, e-mail e senha são obrigatórios"
-    });
-  }
-
   try {
-    const user = await authService.register({
-      name,
-      email,
-      password
-    });
+    const user = await authService.register(req.body);
 
     res.status(201).json(user);
   } catch (error) {
-    console.error("Erro real do Prisma:", error);
+    if (error.statusCode) return res.status(error.statusCode).json({ error: error.message });
     if (error.code === "P2002") {
       return res.status(409).json({
         error: "E-mail já cadastrado"
       });
     }
 
+    console.error("Erro ao cadastrar usuário:", error);
     res.status(500).json({
       error: "Erro interno do servidor"
     });
@@ -55,19 +44,8 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      error: "E-mail e senha são obrigatórios"
-    });
-  }
-
   try {
-    const result = await authService.login({
-      email,
-      password
-    });
+    const result = await authService.login(req.body);
 
     if (!result) {
       return res.status(401).json({
@@ -77,8 +55,9 @@ async function login(req, res) {
 
     res.json(result);
   } catch (error) {
-     console.error("Erro real do Prisma:", error);
-     res.status(500).json({
+    if (error.statusCode) return res.status(error.statusCode).json({ error: error.message });
+    console.error("Erro ao autenticar usuário:", error);
+    res.status(500).json({
       error: "Erro interno do servidor"
     });
   }
